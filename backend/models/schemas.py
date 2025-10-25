@@ -15,3 +15,10 @@ class AnalysisMoment(BaseModel):
 class GeminiAnalysisResponse(BaseModel):
     analysis: List[AnalysisMoment]
     
+
+class AnalysisMomentAPIResponse(BaseModel):
+    image_base64: str
+    posture: Posture
+
+class GeminiAnalysisAPIResponse(BaseModel):
+    analysis: List[AnalysisMomentAPIResponse]

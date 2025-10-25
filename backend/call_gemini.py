@@ -3,7 +3,9 @@ from google import genai
 from dotenv import load_dotenv
 from prompts.prompts import PROMPT_GET_EXERCISE_NAME, PROMPT_ANALYZE_POSE
 from prompts.excercise_criterias import CRITERIAS_MAP
-from models.schemas import ExerciseNameResponse, GeminiAnalysisResponse
+from models.schemas import ExerciseNameResponse, GeminiAnalysisResponse, GeminiAnalysisAPIResponse, AnalysisMomentAPIResponse
+from video_helper import add_timestamps_to_video, cut_image
+import os
 
 load_dotenv()
 
@@ -41,24 +43,32 @@ class GeminiVideoAnalyzer:
             }
         )
         excercise_name = response.parsed.label
-        print(excercise_name)
         criteria = CRITERIAS_MAP.get(excercise_name)
-        
+        base_name, extension = os.path.splitext(file_path)
+        timestamp_video_filepath = f"{base_name}_timestamp{extension}"
+        add_timestamps_to_video(file_path, timestamp_video_filepath)
+        timestamp_video_file = self.upload_and_wait(timestamp_video_filepath)
         response = self.client.models.generate_content(
-            model="gemini-2.5-pro",
-            contents=[video_file, PROMPT_ANALYZE_POSE.format(criteria=criteria)],
+            model="gemini-2.5-flash",
+            contents=[timestamp_video_file, PROMPT_ANALYZE_POSE.format(criteria=criteria)],
             config = {
                 "response_mime_type": "application/json",
                 "response_schema": GeminiAnalysisResponse
             }
         )
-        analysis_response = response.parsed
-        print(analysis_response)
-        return response.text
+        
+        analysis_response:GeminiAnalysisResponse = response.parsed
+        moment_api_response = []
+        for moment in analysis_response.analysis:
+            base64_img = cut_image(moment.timestamp, file_path)
+            moment_api_response.append(AnalysisMomentAPIResponse(posture=moment.posture,
+                                                                 image_base64=base64_img))
+        return GeminiAnalysisAPIResponse(analysis=moment_api_response)
 
 
-analyzer = GeminiVideoAnalyzer()
-result = analyzer.analyze_pose(r"C:\Users\Admin\tuankhaicode\fitness_frontend\backend\videos\output_with_timestamps.mp4")
-print(result)
+# analyzer = GeminiVideoAnalyzer()
+
+# result = analyzer.analyze_pose(r"C:\Users\Admin\tuankhaicode\fitness_frontend\backend\videos\output_with_timestamps.mp4")
+# print(result)
 
 
