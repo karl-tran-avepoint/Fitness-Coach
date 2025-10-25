@@ -1,0 +1,39 @@
+# Squat Exercise Guide
+
+## Form Standard (Good Rep)
+
+- Feet slightly wider than hip-width, toes pointed slightly outward.
+
+- Sit the hips back and down as if lowering into a chair; knees track in line with toes.
+
+- Lower until thighs are at least parallel to the ground (if mobility allows) while keeping weight distributed through heels and mid-foot.
+
+- Maintain a neutral spine: chest up, back straight (not rounded or overly arched). Engage core.
+
+- Rise by pushing through heels and mid-foot, hips and knees extending together. Reset posture before next rep.
+
+## Common Errors and What to Look For
+
+- **Knees collapsing inward (valgus) or drifting off over toes** — improper knee tracking.
+
+- **Not sitting back (hips too forward) or weight shifting onto toes** — improper hip hinge.
+
+- **Heels lifting off the ground** — poor weight distribution.
+
+- **Rounding or arching the lower back** — lose neutral spine.
+
+- **Chest dropping forward or head tilting down/up** — improper upper body position.
+
+- **Depth too shallow (thighs above parallel)** — when mobility allows deeper.
+
+## Safety Flags
+
+- If you cannot maintain flat feet or heels stay elevated → reduce depth or work on ankle mobility.
+
+- If lower back loses neutral alignment (rounds or arches) → stop, reduce range, strengthen core/back.
+
+- If knee alignment is poor (inward collapse) → consider glute and hip abductors strengthening and perform body-weight reps only.
+
+- If depth becomes too shallow due to pain or fatigue → terminate set.
+
+- Always breathe: inhale descending, exhale ascending.
