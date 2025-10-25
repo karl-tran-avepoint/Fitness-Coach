@@ -1,32 +1,94 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { AlertCircle, Play, RotateCcw } from "lucide-react";
+import { AlertCircle, RotateCcw, CheckCircle2, XCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { toast } from "sonner";
+
+// TypeScript interface for the analysis response
+interface AnalysisItem {
+  image_base64: string;
+  posture: {
+    errors: string[];
+    suggestions: string[];
+  };
+}
+
+interface AnalysisResponse {
+  analysis: AnalysisItem[];
+}
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000";
 
 const Results = () => {
   const navigate = useNavigate();
+  const [analysisData, setAnalysisData] = useState<AnalysisResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [downloading, setDownloading] = useState(false);
 
-  const scoreData = [
-    { label: "Total Reps", value: "10", color: "text-primary" },
-    { label: "Clean Reps", value: "8", color: "text-success" },
-    { label: "Form Score", value: "85%", color: "text-primary" },
-    { label: "Balance", value: "Good", color: "text-success" },
-    { label: "Range of Motion", value: "Fair", color: "text-warning" },
-  ];
+  useEffect(() => {
+    // Fetch the analysis data from your backend API
+    // For now, we'll load the example data
+    const fetchAnalysisData = async () => {
+      try {
+        // Replace this with your actual API endpoint
+        const response = await fetch('/example_output.json');
+        const data: AnalysisResponse = await response.json();
+        setAnalysisData(data);
+      } catch (error) {
+        console.error('Error fetching analysis data:', error);
+        // Fallback to empty data
+        setAnalysisData({ analysis: [] });
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const issues = [
-    {
-      frame: "Rep 3, 0:08",
-      issue: "Knees caving in at bottom",
-      emoji: "🦵"
-    },
-    {
-      frame: "Rep 7, 0:18",
-      issue: "Forward lean on descent",
-      emoji: "🏃"
+    fetchAnalysisData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen relative overflow-hidden flex items-center justify-center p-4">
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+          <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1534258936925-c58bed479fcb?q=80&w=2831&auto=format&fit=crop')] bg-cover bg-center opacity-10" />
+        </div>
+        <div className="relative z-10 text-center">
+          <p className="text-white/60 text-lg">Loading results...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const handleDownloadReport = async () => {
+    try {
+      setDownloading(true);
+      const response = await fetch(`${API_BASE_URL}/download-report/`);
+
+      if (!response.ok) {
+        throw new Error(`Unexpected status: ${response.status}`);
+      }
+
+      const blob = await response.blob();
+
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "analysis_report.json";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+
+      toast.success("Report downloaded");
+    } catch (error) {
+      console.error("Error downloading report:", error);
+      toast.error("Failed to download report");
+    } finally {
+      setDownloading(false);
     }
-  ];
+  };
 
   return (
     <div className="min-h-screen relative overflow-hidden py-8 px-4">
@@ -35,114 +97,111 @@ const Results = () => {
         <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1534258936925-c58bed479fcb?q=80&w=2831&auto=format&fit=crop')] bg-cover bg-center opacity-10" />
       </div>
 
-      <div className="relative z-10 max-w-2xl mx-auto space-y-6 animate-fade-in-up">
+      <div className="relative z-10 max-w-6xl mx-auto space-y-6 animate-fade-in-up">
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="hero-title text-5xl mb-2">Results & Feedback</h1>
           <p className="text-white/60">Your analysis is complete</p>
+          {analysisData && (
+            <Badge variant="outline" className="mt-4 text-base px-4 py-2">
+              {analysisData.analysis.length} Frame{analysisData.analysis.length !== 1 ? 's' : ''} Analyzed
+            </Badge>
+          )}
         </div>
 
-        {/* Scorecard */}
-        <Card className="glass-card border-0 shadow-xl">
-          <CardContent className="p-6">
-            <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-              📊 Performance Scorecard
-            </h2>
-            <div className="space-y-3">
-              {scoreData.map((score, idx) => (
-                <div 
-                  key={idx}
-                  className="flex justify-between items-center py-3 border-b border-white/10 last:border-0"
-                >
-                  <span className="text-white/60 font-medium">{score.label}</span>
-                  <span className={`text-xl font-bold ${score.color}`}>{score.value}</span>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Issues Found */}
-        <Card className="glass-card border-0 shadow-xl">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-2 mb-4">
-              <AlertCircle className="text-red-400 w-5 h-5" />
-              <h2 className="text-xl font-bold">Issues Found</h2>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {issues.map((issue, idx) => (
-                <div 
-                  key={idx}
-                  className="relative bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl p-4 overflow-hidden"
-                >
-                  {/* Frame Preview */}
-                  <div className="relative bg-slate-950 rounded-lg h-32 flex items-center justify-center mb-3">
-                    <span className="text-5xl">{issue.emoji}</span>
-                    <Badge 
-                      variant="destructive" 
-                      className="absolute top-2 right-2 animate-blink"
-                    >
-                      ⚠️
-                    </Badge>
+        {/* Analysis Results - Dynamic rendering */}
+        {analysisData && analysisData.analysis.length > 0 ? (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {analysisData.analysis.map((item, index) => (
+              <Card key={index} className="glass-card border-0 shadow-xl">
+                <CardContent className="p-6">
+                  <div className="mb-4 flex items-center justify-between">
+                    <h2 className="text-xl font-bold">Frame {index + 1}</h2>
+                    {item.posture.errors.length > 0 && (
+                      <Badge variant="destructive">
+                        {item.posture.errors.length} Issue{item.posture.errors.length !== 1 ? 's' : ''}
+                      </Badge>
+                    )}
                   </div>
-                  
-                  {/* Annotation */}
-                  <div className="bg-red-500/10 border-l-4 border-red-400 rounded px-3 py-2">
-                    <p className="text-xs text-white/40 mb-1">{issue.frame}</p>
-                    <p className="text-sm text-red-400 font-semibold">{issue.issue}</p>
+
+                  {/* Image from base64 */}
+                  <div className="relative bg-slate-950 rounded-lg mb-4 overflow-hidden">
+                    <img
+                      src={`data:image/jpeg;base64,${item.image_base64}`}
+                      alt={`Analysis frame ${index + 1}`}
+                      className="w-full h-auto object-contain"
+                    />
                   </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
 
-        {/* Coach Feedback */}
-        <Card className="glass-card shadow-xl bg-primary/20 border-primary/30 text-white">
-          <CardContent className="p-6">
-            <div className="flex items-start gap-3">
-              <span className="text-3xl">🎯</span>
-              <div>
-                <h3 className="font-bold text-lg mb-2">Key Fix</h3>
-                <p className="leading-relaxed">
-                  Focus on maintaining proper form throughout the full range of motion. 
-                  Your overall technique is solid, but pay attention to alignment and 
-                  control during the most challenging parts of the movement. Consider 
-                  reducing weight or reps to maintain better form consistency.
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+                  {/* Errors Section */}
+                  {item.posture.errors.length > 0 && (
+                    <div className="mb-4">
+                      <div className="flex items-center gap-2 mb-3">
+                        <XCircle className="text-red-400 w-5 h-5" />
+                        <h3 className="font-semibold text-red-400">Issues Detected</h3>
+                      </div>
+                      <div className="space-y-2">
+                        {item.posture.errors.map((error, errorIdx) => (
+                          <div
+                            key={errorIdx}
+                            className="bg-red-500/10 border-l-4 border-red-400 rounded px-3 py-2"
+                          >
+                            <p className="text-sm text-red-300">{error}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
-        {/* Timeline */}
-        <div className="flex justify-center gap-2 py-4">
-          {[...Array(10)].map((_, idx) => (
-            <div 
-              key={idx}
-              className="w-3 h-3 rounded-full bg-primary/60 hover:bg-primary transition-colors cursor-pointer"
-            />
-          ))}
-        </div>
+                  {/* Suggestions Section */}
+                  {item.posture.suggestions.length > 0 && (
+                    <div>
+                      <div className="flex items-center gap-2 mb-3">
+                        <CheckCircle2 className="text-green-400 w-5 h-5" />
+                        <h3 className="font-semibold text-green-400">Recommendations</h3>
+                      </div>
+                      <div className="space-y-2">
+                        {item.posture.suggestions.map((suggestion, suggestionIdx) => (
+                          <div
+                            key={suggestionIdx}
+                            className="bg-green-500/10 border-l-4 border-green-400 rounded px-3 py-2"
+                          >
+                            <p className="text-sm text-green-300">{suggestion}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <Card className="glass-card border-0 shadow-xl">
+            <CardContent className="p-6 text-center">
+              <AlertCircle className="w-12 h-12 mx-auto mb-4 text-yellow-400" />
+              <p className="text-white/60">No analysis data available</p>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Action Buttons */}
-        <div className="grid grid-cols-2 gap-4">
-          <Button 
-            className="bg-primary hover:bg-primary/90 text-white h-12 text-base font-semibold"
-            onClick={() => {/* Replay video logic */}}
-          >
-            <Play className="mr-2 w-5 h-5" />
-            Replay with Comments
-          </Button>
-          
-          <Button 
-            variant="outline" 
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8">
+          <Button
+            variant="outline"
             className="h-12 text-base font-semibold border-2 border-white/20 text-white hover:bg-white/10"
             onClick={() => navigate("/")}
           >
             <RotateCcw className="mr-2 w-5 h-5" />
             Analyze Another
+          </Button>
+
+          <Button
+            className="bg-primary hover:bg-primary/90 text-white h-12 text-base font-semibold"
+            onClick={handleDownloadReport}
+            disabled={downloading}
+          >
+            {downloading ? "Preparing..." : "Download Report"}
           </Button>
         </div>
       </div>
