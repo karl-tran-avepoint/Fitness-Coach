@@ -1,7 +1,9 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Video, Upload, CheckCircle, Sparkles } from "lucide-react";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Video, Upload, CheckCircle, Sparkles, Zap, Brain, TrendingUp } from "lucide-react";
 import { toast } from "sonner";
 
 const Record = () => {
@@ -102,52 +104,89 @@ const Record = () => {
         </div>
 
         {/* Hero Content */}
-        <div className="relative z-10 text-center px-4 max-w-4xl mx-auto animate-fade-in-up">
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card mb-8">
-            <Sparkles className="w-4 h-4 text-primary" />
-            <span className="text-sm font-medium">AI-Powered Analysis</span>
-          </div>
+        <div className="relative z-10 w-full px-4">
+          <div className="max-w-5xl mx-auto animate-fade-in-up">
+            <header className="mb-12 flex flex-col items-center justify-between gap-6 text-white/80 sm:flex-row">
+              <div className="flex items-center gap-3">
+                <Avatar className="h-12 w-12 border border-white/10 bg-gradient-to-br from-primary/70 via-primary to-primary/50 shadow-lg shadow-primary/20">
+                  <AvatarFallback className="bg-transparent text-white">
+                    <Sparkles className="h-5 w-5" />
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.4em] text-white/40">Welcome to</p>
+                  <div className="flex items-center gap-2">
+                    <span className="text-3xl font-semibold text-white">Fitcoach</span>
+                    <Badge variant="secondary" className="border border-white/10 bg-white/10 text-xs font-medium uppercase tracking-wider text-white backdrop-blur">
+                      AI Coach
+                    </Badge>
+                  </div>
+                </div>
+              </div>
 
-          {/* Headline */}
-          <h1 className="hero-title text-6xl md:text-8xl mb-6 leading-tight">
-            <span className="text-white">Perfect</span>{" "}
-            <span className="italic text-primary">your</span>{" "}
-            <span className="text-white">form</span>
-          </h1>
+            </header>
 
-          {/* Subtitle */}
-          <p className="text-xl md:text-2xl text-white/70 mb-12 max-w-2xl mx-auto leading-relaxed">
-            Get instant AI feedback on your exercise technique. 
-            Record or upload, and we'll analyze your form in seconds.
-          </p>
+            <div className="text-center">
+              {/* Badge */}
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card mb-8">
+                <Sparkles className="w-4 h-4 text-primary" />
+                <span className="text-sm font-medium">AI-Powered Analysis</span>
+              </div>
 
-          {/* CTA Button */}
-          <Button 
-            onClick={() => setShowRecording(true)}
-            size="lg"
-            className="h-16 px-12 text-lg font-semibold bg-primary hover:bg-primary/90 text-white shadow-2xl shadow-primary/20 transition-all duration-300 hover:scale-105"
-          >
-            Get Started
-          </Button>
+              {/* Headline */}
+              <h1 className="hero-title text-6xl md:text-8xl mb-6 leading-tight">
+                <span className="text-white">Perfect</span>{" "}
+                <span className="italic text-primary">your</span>{" "}
+                <span className="text-white">form</span>
+              </h1>
 
-          {/* Features */}
-          <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-6 max-w-3xl mx-auto">
-            <div className="glass-card p-6 rounded-2xl">
-              <div className="text-3xl mb-3">🎯</div>
-              <h3 className="font-semibold mb-2">Instant Analysis</h3>
-              <p className="text-sm text-white/60">Get feedback in seconds</p>
+              {/* Subtitle */}
+              <p className="text-xl md:text-2xl text-white/70 mb-12 max-w-2xl mx-auto leading-relaxed">
+                Fitcoach helps you perfect every lift with instant AI feedback on your exercise technique. 
+                Record or upload, and we'll analyze your form in seconds.
+              </p>
+
+              {/* CTA Button */}
+              <Button
+                onClick={() => setShowRecording(true)}
+                size="lg"
+                className="h-16 px-12 text-lg font-semibold bg-primary hover:bg-primary/90 text-white shadow-2xl shadow-primary/20 transition-all duration-300 hover:scale-105"
+              >
+                Get Started
+              </Button>
+
+              {/* Features */}
+              <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-6 max-w-3xl mx-auto">
+                <div className="glass-card p-6 rounded-2xl">
+                  <div className="flex justify-center mb-4">
+                    <div className="p-3 bg-primary/10 rounded-xl">
+                      <Zap className="w-8 h-8 text-primary" />
+                    </div>
+                  </div>
+                  <h3 className="font-semibold mb-2">Instant Analysis</h3>
+                  <p className="text-sm text-white/60">Get feedback in seconds</p>
+                </div>
+                <div className="glass-card p-6 rounded-2xl">
+                  <div className="flex justify-center mb-4">
+                    <div className="p-3 bg-primary/10 rounded-xl">
+                      <Brain className="w-8 h-8 text-primary" />
+                    </div>
+                  </div>
+                  <h3 className="font-semibold mb-2">AI-Powered</h3>
+                  <p className="text-sm text-white/60">Advanced motion tracking</p>
+                </div>
+                <div className="glass-card p-6 rounded-2xl">
+                  <div className="flex justify-center mb-4">
+                    <div className="p-3 bg-primary/10 rounded-xl">
+                      <TrendingUp className="w-8 h-8 text-primary" />
+                    </div>
+                  </div>
+                  <h3 className="font-semibold mb-2">Improve Form</h3>
+                  <p className="text-sm text-white/60">Prevent injuries, lift better</p>
+                </div>
+              </div>
             </div>
-            <div className="glass-card p-6 rounded-2xl">
-              <div className="text-3xl mb-3">🤖</div>
-              <h3 className="font-semibold mb-2">AI-Powered</h3>
-              <p className="text-sm text-white/60">Advanced motion tracking</p>
-            </div>
-            <div className="glass-card p-6 rounded-2xl">
-              <div className="text-3xl mb-3">💪</div>
-              <h3 className="font-semibold mb-2">Improve Form</h3>
-              <p className="text-sm text-white/60">Prevent injuries, lift better</p>
-            </div>
+
           </div>
         </div>
       </div>
