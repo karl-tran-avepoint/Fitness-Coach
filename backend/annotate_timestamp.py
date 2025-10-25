@@ -103,5 +103,3 @@ input_video = "cut-video.mp4"
 
 # 2. This will be the name of your new file
 output_video = "output_with_timestamps.mp4" 
-
-add_timestamps_to_video(input_video, output_video)

@@ -1,6 +1,9 @@
 import time
 from google import genai
 from dotenv import load_dotenv
+from prompts.prompts import PROMPT_GET_EXERCISE_NAME, PROMPT_ANALYZE_POSE
+from prompts.excercise_criterias import CRITERIAS_MAP
+from models.schemas import ExerciseNameResponse, GeminiAnalysisResponse
 
 load_dotenv()
 
@@ -28,22 +31,34 @@ class GeminiVideoAnalyzer:
 
     def analyze_pose(self, file_path):
         video_file = self.upload_and_wait(file_path)
-        prompt = (
-            "Analyze the posture in this video at each timestamp. "
-            "For each timestamp, return a JSON object with: "
-            "timestamp, posture.errors (list of errors), posture.suggestions (list of suggestions). "
-            "Format output as: "
-            "{'analysis': [{'timestamp': 'MM:SS', 'posture': {'errors': [...], 'suggestions': [...]}}]}"
-        )
+        # Classify exercise
         response = self.client.models.generate_content(
             model="gemini-2.5-pro",
-            contents=[video_file, prompt]
+            contents=[video_file, PROMPT_GET_EXERCISE_NAME],
+            config = {
+                "response_mime_type": "application/json",
+                "response_schema": ExerciseNameResponse
+            }
         )
+        excercise_name = response.parsed.label
+        print(excercise_name)
+        criteria = CRITERIAS_MAP.get(excercise_name)
+        
+        response = self.client.models.generate_content(
+            model="gemini-2.5-pro",
+            contents=[video_file, PROMPT_ANALYZE_POSE.format(criteria=criteria)],
+            config = {
+                "response_mime_type": "application/json",
+                "response_schema": GeminiAnalysisResponse
+            }
+        )
+        analysis_response = response.parsed
+        print(analysis_response)
         return response.text
 
-# Example usage:
-# analyzer = GeminiVideoAnalyzer()
-# result = analyzer.analyze_pose(r"C:\Users\Admin\tuankhaicode\fitness_frontend\backend\videos\output_with_timestamps.mp4")
-# print(result)
+
+analyzer = GeminiVideoAnalyzer()
+result = analyzer.analyze_pose(r"C:\Users\Admin\tuankhaicode\fitness_frontend\backend\videos\output_with_timestamps.mp4")
+print(result)
 
 
