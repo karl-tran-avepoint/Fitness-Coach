@@ -28,24 +28,18 @@ const Results = () => {
   const [downloading, setDownloading] = useState(false);
 
   useEffect(() => {
-    // Fetch the analysis data from your backend API
-    // For now, we'll load the example data
-    const fetchAnalysisData = async () => {
+    // Read analysis result from localStorage
+    const stored = localStorage.getItem("analysisResult");
+    if (stored) {
       try {
-        // Replace this with your actual API endpoint
-        const response = await fetch('/example_output.json');
-        const data: AnalysisResponse = await response.json();
-        setAnalysisData(data);
-      } catch (error) {
-        console.error('Error fetching analysis data:', error);
-        // Fallback to empty data
+        setAnalysisData(JSON.parse(stored));
+      } catch (err) {
         setAnalysisData({ analysis: [] });
-      } finally {
-        setLoading(false);
       }
-    };
-
-    fetchAnalysisData();
+    } else {
+      setAnalysisData({ analysis: [] });
+    }
+    setLoading(false);
   }, []);
 
   if (loading) {

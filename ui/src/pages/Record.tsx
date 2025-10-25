@@ -77,14 +77,61 @@ const Record = () => {
     }
   };
 
-  const handleSubmit = () => {
-    if (recordedVideo || uploadedVideo) {
-      toast.success("Submitting video for analysis...");
-      setTimeout(() => {
-        navigate("/analyze");
-      }, 500);
-    } else {
+  const handleSubmit = async () => {
+    if (!(recordedVideo || uploadedVideo)) {
       toast.error("Please record or upload a video first");
+      return;
+    }
+
+    toast.success("Submitting video for analysis...");
+
+    let videoBlob: Blob | null = null;
+    let fileName = "video.mp4";
+
+    // If recorded, fetch the blob from the object URL
+    if (recordedVideo) {
+      try {
+        const res = await fetch(recordedVideo);
+        videoBlob = await res.blob();
+        // Use webm extension if recorded
+        fileName = "video.webm";
+      } catch (err) {
+        toast.error("Failed to read recorded video");
+        return;
+      }
+    } else if (uploadedVideo && fileInputRef.current && fileInputRef.current.files?.[0]) {
+      videoBlob = fileInputRef.current.files[0];
+      fileName = "video.mp4";
+    }
+
+    if (!videoBlob) {
+      toast.error("Could not find video data");
+      return;
+    }
+
+    // Send video to backend
+    try {
+      const formData = new FormData();
+      formData.append("file", videoBlob, fileName);
+
+      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000";
+      const response = await fetch(`${API_BASE_URL}/analyze-video/`, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error(`Unexpected status: ${response.status}`);
+      }
+
+      // Optionally, you can store the result in localStorage or context for Results page
+      const result = await response.json();
+      localStorage.setItem("analysisResult", JSON.stringify(result));
+
+      navigate("/analyze");
+    } catch (err) {
+      toast.error("Failed to submit video for analysis");
+      console.error(err);
     }
   };
 
