@@ -35,7 +35,7 @@ class GeminiVideoAnalyzer:
         video_file = self.upload_and_wait(file_path)
         # Classify exercise
         response = self.client.models.generate_content(
-            model="gemini-2.5-pro",
+            model="gemini-2.5-flash",
             contents=[video_file, PROMPT_GET_EXERCISE_NAME],
             config = {
                 "response_mime_type": "application/json",
@@ -61,8 +61,9 @@ class GeminiVideoAnalyzer:
         moment_api_response = []
         for moment in analysis_response.analysis:
             base64_img = cut_image(moment.timestamp, file_path)
-            moment_api_response.append(AnalysisMomentAPIResponse(posture=moment.posture,
-                                                                 image_base64=base64_img))
+            if base64_img:
+                moment_api_response.append(AnalysisMomentAPIResponse(posture=moment.posture,
+                                                                    image_base64=base64_img))
         return GeminiAnalysisAPIResponse(analysis=moment_api_response)
 
 
